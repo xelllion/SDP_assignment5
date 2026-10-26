@@ -13,11 +13,14 @@ the selected strategy instead of choosing an operation through conditions.
 
 The design follows Lecture 7: the client creates a concrete strategy, the context
 stores it through an interface, and execution is delegated to that interface.
-`Main` uses one calculator with the values 12 and 4, switching its strategy three times
-during execution. The results are 16.0, 8.0, 48.0 and 3.0. It also demonstrates
-5 / 2 = 2.5 and catches division by zero to print
-`Warning: Cannot divide by zero.`. The zero-divisor check belongs to
-`DivideStrategy`; the context still contains no algorithm-selection conditions.
+`Main` uses one calculator and the values stored in `a` and `b`, switching its
+strategy three times during execution. With the current values 12 and 0, the
+first three results are 12.0, 12.0 and 0.0, followed by
+`Warning: Cannot divide by zero.`. The actual division call is inside `try/catch`,
+so the program finishes normally. Instructions for changing the operands and
+checking normal, fractional and zero-divisor cases are in the README.
+The zero-divisor check belongs to `DivideStrategy`; the context still contains
+no algorithm-selection conditions.
 
 ## 2. UML class diagram
 
@@ -60,9 +63,27 @@ classDiagram
     Main ..> DivideStrategy : creates
 ```
 
-The dashed realization arrows show that each algorithm implements `Strategy`.
-The calculator's association points to the interface, not to a concrete algorithm.
-Client dependencies show where objects are created and configured.
+### Meaning of the UML arrows
+
+| Connection | Line and arrowhead | Meaning in this project |
+| --- | --- | --- |
+| Each concrete strategy to `Strategy` (`Strategy <|.. ConcreteStrategy`) | Dashed line, hollow triangular arrowhead pointing to `Strategy` | Interface realization: the class uses `implements Strategy`, not class inheritance. |
+| `Calculator --> Strategy` | Solid line, navigable association arrow pointing to `Strategy` | The calculator stores a `Strategy` field and delegates to it. |
+| `Main ..> Calculator` and `Main ..> EachConcreteStrategy` | Dashed line, dependency arrow pointing to the used class | The client creates and uses these objects within `main`; it does not store them as fields. |
+
+The association and dependency arrowheads are ordinary open arrowheads, not the
+hollow triangles used for interface realization. A hollow triangle with a solid
+line would represent class inheritance; this project has no such relationship.
+A filled diamond would mean composition (exclusive whole-part ownership), and a
+hollow diamond would mean shared aggregation. Neither diamond is needed here:
+strategies are supplied from outside, can be replaced and can be shared between
+calculators. A plain navigable association accurately represents the field.
+“Composition over inheritance” as a design principle does not automatically mean
+a UML composition diamond.
+
+All four realization arrows point to the interface. `Calculator` has no direct
+association with any concrete strategy. `Main.main` is static (the `$` suffix in
+Mermaid); `+` marks public members and `-` marks the private strategy field.
 
 ## 3. Clean Code
 
@@ -192,3 +213,5 @@ https://github.com/xelllion/SDP_assignment5
   35–42 (Clean Code and class design). Supplied course PDF.
 - OpenAI Codex assisted with implementation, documentation and verification.
   This is an assisted project, not a claim of unaided work.
+
+- Mermaid documentation, [Class diagrams](https://mermaid.js.org/syntax/classDiagram.html): relationship notation and static members.

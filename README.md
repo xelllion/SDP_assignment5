@@ -32,15 +32,13 @@ javac -d out src/*.java
 java -cp out Main
 ```
 
-Expected output:
+Expected output with the current values `a = 12` and `b = 0`:
 
 ```text
 Amerkhanova Aruzhan | SE-2529
-Addition: 16.0
-Subtraction: 8.0
-Multiplication: 48.0
-Division: 3.0
-Division (5 / 2): 2.5
+Addition: 12.0
+Subtraction: 12.0
+Multiplication: 0.0
 Warning: Cannot divide by zero.
 ```
 
@@ -48,6 +46,22 @@ No libraries, build tools or user input are required. Strategies must be non-nul
 Inputs are `int` values; results are `double` so division preserves the fractional part.
 `DivideStrategy` throws `ArithmeticException` for a zero divisor. `Main` catches it
 and prints an English warning without a stack trace.
+
+## Change the numbers and check division
+
+Edit only `a` and `b` at the beginning of `Main.main()`, then run `Main` again.
+All four strategies use those same values. There are no separate hard-coded division examples.
+
+| Values | Expected division output |
+| --- | --- |
+| `a = 12`, `b = 4` | `Division: 3.0` |
+| `a = 5`, `b = 2` | `Division: 2.5` |
+| `a = -5`, `b = 2` | `Division: -2.5` |
+| `a = 0`, `b = 2` | `Division: 0.0` |
+| `a = 12`, `b = 0` | `Warning: Cannot divide by zero.` |
+
+The division call is inside `try/catch`, so a zero divisor produces a warning
+and the program finishes normally (exit code 0), without an exception stack trace.
 
 ## Add another strategy
 
