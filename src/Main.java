@@ -15,6 +15,8 @@ public class Main {
 
         calculator.setStrategy(new DivideStrategy());
         System.out.println("Division: " + calculator.calculate(a, b));
+
+        // Division examples
         System.out.println("Division (5 / 2): " + calculator.calculate(5, 2));
 
         try {
