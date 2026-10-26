@@ -6,14 +6,18 @@
 ## 1. Introduction
 
 The selected domain is Option B, a calculator. Its algorithm family consists of
-addition, subtraction and multiplication of two integers. Each operation is a
+addition, subtraction, multiplication and division of two integers. Results use
+`double` to preserve the fractional part of division. Each operation is a
 separate implementation of `Strategy`. The calculator delegates computation to
 the selected strategy instead of choosing an operation through conditions.
 
 The design follows Lecture 7: the client creates a concrete strategy, the context
 stores it through an interface, and execution is delegated to that interface.
-`Main` uses one calculator with the values 12 and 4, switching its strategy twice
-during execution. The results are 16, 8 and 48.
+`Main` uses one calculator with the values 12 and 4, switching its strategy three times
+during execution. The results are 16.0, 8.0, 48.0 and 3.0. It also demonstrates
+5 / 2 = 2.5 and catches division by zero to print
+`Warning: Cannot divide by zero.`. The zero-divisor check belongs to
+`DivideStrategy`; the context still contains no algorithm-selection conditions.
 
 ## 2. UML class diagram
 
@@ -21,22 +25,25 @@ during execution. The results are 16, 8 and 48.
 classDiagram
     class Strategy {
         <<interface>>
-        +execute(int a, int b) int
+        +execute(int a, int b) double
     }
     class AddStrategy {
-        +execute(int a, int b) int
+        +execute(int a, int b) double
     }
     class SubtractStrategy {
-        +execute(int a, int b) int
+        +execute(int a, int b) double
     }
     class MultiplyStrategy {
-        +execute(int a, int b) int
+        +execute(int a, int b) double
+    }
+    class DivideStrategy {
+        +execute(int a, int b) double
     }
     class Calculator {
         -Strategy strategy
         +Calculator(Strategy strategy)
         +setStrategy(Strategy strategy) void
-        +calculate(int a, int b) int
+        +calculate(int a, int b) double
     }
     class Main {
         +main(String[] args) void$
@@ -44,11 +51,13 @@ classDiagram
     Strategy <|.. AddStrategy
     Strategy <|.. SubtractStrategy
     Strategy <|.. MultiplyStrategy
+    Strategy <|.. DivideStrategy
     Calculator --> Strategy : holds and delegates
     Main ..> Calculator : creates and configures
     Main ..> AddStrategy : creates
     Main ..> SubtractStrategy : creates
     Main ..> MultiplyStrategy : creates
+    Main ..> DivideStrategy : creates
 ```
 
 The dashed realization arrows show that each algorithm implements `Strategy`.
@@ -57,11 +66,22 @@ Client dependencies show where objects are created and configured.
 
 ## 3. Clean Code
 
+The examples below include class and method context so IntelliJ can parse them.
+The example wrappers belong only to this report; the project contains seven Java files.
+
 ### 3.1. Replace conditional algorithm selection with polymorphism
 
 ```java
-public int calculate(int a, int b) {
-    return strategy.execute(a, b); // The current object supplies the algorithm.
+class DelegationExample {
+    private final Strategy strategy;
+
+    DelegationExample(Strategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public double calculate(int a, int b) {
+        return strategy.execute(a, b); // The object supplies the algorithm.
+    }
 }
 ```
 
@@ -71,8 +91,15 @@ The same call executes the selected implementation.
 ### 3.2. Meaningful names
 
 ```java
-calculator.setStrategy(new SubtractStrategy()); // The operation is explicit.
-System.out.println("Subtraction: " + calculator.calculate(a, b));
+class NamingExample {
+    public static void main(String[] args) {
+        int a = 12;
+        int b = 4;
+        Calculator calculator = new Calculator(new AddStrategy());
+        calculator.setStrategy(new SubtractStrategy()); // Explicit operation.
+        System.out.println("Subtraction: " + calculator.calculate(a, b));
+    }
+}
 ```
 
 `Calculator`, `SubtractStrategy`, `setStrategy` and `calculate` describe their
@@ -83,8 +110,8 @@ purpose. The names identify both the operation and its role in the design.
 ```java
 public class AddStrategy implements Strategy {
     @Override
-    public int execute(int a, int b) {
-        return a + b; // Only addition: no input, output or strategy selection.
+    public double execute(int a, int b) {
+        return a + b; // Only addition; output belongs to the client.
     }
 }
 ```
@@ -96,10 +123,20 @@ editing the arithmetic classes.
 ### 3.4. Depend on an abstraction and encapsulate the reference
 
 ```java
-private Strategy strategy; // Private and interface-typed.
+class EncapsulationExample {
+    private Strategy strategy; // Private and interface-typed.
 
-public void setStrategy(Strategy strategy) {
-    this.strategy = strategy;
+    EncapsulationExample(Strategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public void setStrategy(Strategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public double calculate(int a, int b) {
+        return strategy.execute(a, b);
+    }
 }
 ```
 
@@ -112,8 +149,8 @@ lecture's guidance on encapsulation and depending on abstractions.
 ```java
 public class MultiplyStrategy implements Strategy {
     @Override
-    public int execute(int a, int b) {
-        return a * b; // Another implementation of the unchanged contract.
+    public double execute(int a, int b) {
+        return a * b; // Another implementation of the same contract.
     }
 }
 ```
@@ -139,7 +176,7 @@ Changing the strategy reference alone does not make this the State pattern.
 
 The calculator can change algorithms while keeping the same context object.
 The interface and delegation make each operation small and easy to explain.
-The cost is extra classes: one interface and five classes for three simple
+The cost is extra classes: one interface and six classes for four simple
 operations. This is useful for demonstrating Strategy, although direct arithmetic
 would be shorter for a fixed calculator without interchangeable algorithms.
 

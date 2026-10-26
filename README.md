@@ -4,13 +4,13 @@
 **Group:** SE-2529  
 **Topic:** Option B — Calculator
 
-Three interchangeable strategies perform addition, subtraction and multiplication.
+Four interchangeable strategies perform addition, subtraction, multiplication and division.
 `Main` changes the strategy on the same `Calculator` object while the program runs.
 
 ## Structure
 
 - `src/Strategy.java` — common `execute(int a, int b)` method.
-- `src/AddStrategy.java`, `SubtractStrategy.java`, `MultiplyStrategy.java` — algorithms.
+- `src/AddStrategy.java`, `SubtractStrategy.java`, `MultiplyStrategy.java`, `DivideStrategy.java` — algorithms.
 - `src/Calculator.java` — stores a strategy and delegates calculation.
 - `src/Main.java` — client and runtime switching demonstration.
 - [report.md](report.md) — UML, Clean Code discussion and Strategy vs. State.
@@ -36,13 +36,18 @@ Expected output:
 
 ```text
 Amerkhanova Aruzhan | SE-2529
-Addition: 16
-Subtraction: 8
-Multiplication: 48
+Addition: 16.0
+Subtraction: 8.0
+Multiplication: 48.0
+Division: 3.0
+Division (5 / 2): 2.5
+Warning: Cannot divide by zero.
 ```
 
 No libraries, build tools or user input are required. Strategies must be non-null.
-The example uses Java `int` arithmetic and small values.
+Inputs are `int` values; results are `double` so division preserves the fractional part.
+`DivideStrategy` throws `ArithmeticException` for a zero divisor. `Main` catches it
+and prints an English warning without a stack trace.
 
 ## Add another strategy
 

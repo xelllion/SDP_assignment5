@@ -9,7 +9,7 @@ public class Calculator {
         this.strategy = strategy;
     }
 
-    public int calculate(int a, int b) {
+    public double calculate(int a, int b) {
         return strategy.execute(a, b);
     }
 }
